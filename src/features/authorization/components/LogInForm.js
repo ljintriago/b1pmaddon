@@ -73,7 +73,7 @@ export default function LogInForm() {
         style={{ height: '65px' }} 
         direction={FlexBoxDirection.Column}>
           <Label for="pass">Contraseña:</Label>
-          <Input type={InputType.Password} name="pass" ref={userRef} required/>
+          <Input type={InputType.Password} name="pass" ref={passRef} required/>
         </FlexBox>
         <FlexBox>
           <Button disabled={loading} children="Log In" design={ButtonDesign.Emphasized} onClick={handleSubmit}/>
