@@ -10,30 +10,41 @@ import {
     InputType,
     Button,
     ButtonDesign,
-    Card
+    Toast
   } from '@ui5/webcomponents-react';
+import "@ui5/webcomponents/dist/features/InputElementsFormSupport.js";
 import { useAuth } from "../../../contexts/AuthContext"
 import "../assets/LogIn.css"
+import configData from "../../../data/LogInConfig.json"
+import { useNavigate } from "react-router-dom"
+
 
 export default function LogInForm() {
   const userRef = useRef()
   const passRef = useRef()
   const { login } = useAuth()
   const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false) 
+  const [loading, setLoading] = useState(false)
+  const company = configData["companyDB"] 
+  const toast = useRef()
+  const navigate = useNavigate()
 
+  const showToast = () => {
+    toast.current.show();
+  };
+  
   async function handleSubmit(e) {
     e.preventDefault()
-
     try{
       setError("")
       setLoading(true)
       await login(userRef.current.value, passRef.current.value)
+      navigate("/massPayments")
     }catch{
       setError("Credenciales inválidas")
+      setLoading(false)
+      showToast()
     }
-
-
   }
 
   return (
@@ -51,25 +62,27 @@ export default function LogInForm() {
         style={{ height: '75px' }}  
         direction={FlexBoxDirection.Column}>
           <Label for="companydb">CompanyDB:</Label>
-          <Input name="companydb" readonly="true"/>
+          <Input name="companydb" value={ company } readonly="true"/>
         </FlexBox>
         <FlexBox
         direction={FlexBoxDirection.Column}>
           <Label for="usuario">Usuario:</Label>
-          <Input name="usuario"/>
+          <Input name="usuario" ref={userRef} required/>
         </FlexBox>
         <FlexBox
         style={{ height: '65px' }} 
         direction={FlexBoxDirection.Column}>
           <Label for="pass">Contraseña:</Label>
-          <Input type={InputType.Password} name="pass"/>
+          <Input type={InputType.Password} name="pass" ref={userRef} required/>
         </FlexBox>
         <FlexBox>
           <Button disabled={loading} children="Log In" design={ButtonDesign.Emphasized} onClick={handleSubmit}/>
         </FlexBox>
         
       </FlexBox>
-      
+      <Toast ref={ toast } >
+        { error }
+      </Toast>
     </>
   )
 }
