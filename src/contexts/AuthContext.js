@@ -14,7 +14,7 @@ export function AuthProvider({children}) {
 
     function login(user, password) {
         const logindata = { CompanyDB: configData["companyDB"] , UserName: user ,Password: password }
-        axios.post(configData["url"] + "b1s/v1/Login", logindata)
+        axios.post(configData["url"] + "Login", logindata)
     }
 
     const value = {
