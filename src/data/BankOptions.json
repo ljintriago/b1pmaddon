@@ -1,0 +1,15 @@
+{"options":{
+    "bank1":{
+        "name":"Banco Guayaquil"
+        },
+    
+    "bank2":{
+            "name":"Banco Pichincha"
+        },
+
+    "bank3":{
+            "name":"Produbanco"
+        }
+    }
+    
+}
