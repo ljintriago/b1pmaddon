@@ -14,7 +14,9 @@ export function AuthProvider({children}) {
 
     function login(user, password) {
         const logindata = { CompanyDB: configData["companyDB"] , UserName: user ,Password: password }
-        axios.post(configData["url"] + "Login", logindata)
+        axios.post(configData["url"] + "Login", logindata, {withCredentials:true})
+        .then(res => console.log(res))
+        .catch(err => console.log(err))
     }
 
     const value = {

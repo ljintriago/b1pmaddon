@@ -1,15 +1,18 @@
-{"options":{
-    "bank1":{
-        "name":"Banco Guayaquil"
-        },
+{"options":[
+    {
+        "name":"Banco Guayaquil",
+        "selectedDataFromView": "?$select=PA,Account,Secuencial,Blank1,BAccount,DocCurr,Total,CTA,BankCode,UsrNumber1,BAccount2,UsrNumber2,UsrNumber3,AcctName,Blank2,Blank3,Blank4,Blank5,Referencia,Leyenda"
+    },
     
-    "bank2":{
-            "name":"Banco Pichincha"
-        },
+    {
+            "name":"Banco Pichincha",
+            "selectedDataFromView": "?$select=PA,UsrNumber3,DocCurr,Total,CTA,UsrNumber1,BAccount,UsrNumber2,UsrNumber32,AcctName,BankCode"
+    },
 
-    "bank3":{
-            "name":"Produbanco"
-        }
+    {
+            "name":"Produbanco",
+            "selectedDataFromView": "?$select=PA,Account,Secuencial,Blank1,UsrNumber3,DocCurr,TotalProdubanco,CTA,BankCode,UsrNumber1,BAccount,UsrNumber2,UsrNumber32,AcctName,Blank2,Blank3,Blank4,Blank5,Referencia"
     }
+    ]
     
 }
