@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { 
   ShellBar,
   DynamicPage,
@@ -12,7 +12,8 @@ import {
   DynamicPageHeader,
   CheckBox,
   ComboBox,
-  ComboBoxItem
+  ComboBoxItem,
+  BusyIndicator
  } from '@ui5/webcomponents-react';
  import axios from 'axios'
  import configData from "../../../data/LogInConfig.json"
@@ -20,15 +21,17 @@ import {
  import SAPTableComponent  from '../../../components/Table'
 
 export default function MassivePayments() {
+  let dofileDownload = useRef()
   const [dataTable, setDataTable] = useState([])
   const [dates, setDates] = useState([])
   const [checkState, setCheckState] = useState(false)
   const [selectedRows, setSelectedRows] = useState([])
   const [bankPicked, setBankPicked] = useState("")
+  const [fileDownloadUrl, setFileDownloadUrl] = useState("")
+  const [biactivator, setBiactivator] = useState(false)
   const currentdate = new Date()
   const fileName = "PAGOS_MASIVOS_"+ bankPicked.replace(" ", "") +  currentdate.getDate() + (currentdate.getMonth()+1) + currentdate.getFullYear() + currentdate.getHours() + currentdate.getMinutes() + ".txt"
 
-  console.log(fileName)
 
   useEffect(() => {
     axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=U_U_GENARC eq null', {withCredentials:true})
@@ -37,7 +40,7 @@ export default function MassivePayments() {
   }, [])
 
   useEffect(() => {
-    axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=PmntDate ge \''+ dates[0] +'\' and PmntDate le \''+ dates[1] +'\'', {withCredentials:true})
+    if (dates.length!==0) axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=PmntDate ge \''+ dates[0] +'\' and PmntDate le \''+ dates[1] +'\'', {withCredentials:true})
     .then(res => setDataTable(res.data["value"]))
     .catch(err => console.log(err))
   }, [dates])
@@ -53,6 +56,13 @@ export default function MassivePayments() {
       .catch(err => console.log(err))
     }
   }, [checkState])
+
+  useEffect(() => {
+    if (fileDownloadUrl !== ""){
+      dofileDownload.click();
+      setBiactivator(false)
+    }  
+  }, [fileDownloadUrl])
   
   function handleFilter(e){
     setDates(e.detail["value"].split(" - "))
@@ -68,13 +78,7 @@ export default function MassivePayments() {
 
   function fileDownload(fileTextContent){
     const blob = new Blob([fileTextContent])
-    const fileDownloadUrl = URL.createObjectURL(blob)
-    this.setState ({fileDownloadUrl: fileDownloadUrl}, 
-      () => {
-        this.dofileDownload.click(); 
-        //URL.revokeObjectURL(fileDownloadUrl)  // free up storage--no longer needed.
-        this.setState({fileDownloadUrl: ""})
-      }) 
+    setFileDownloadUrl(URL.createObjectURL(blob))
   }
 
   async function handleGenArch(e){
@@ -87,6 +91,7 @@ export default function MassivePayments() {
     }else if(bankPicked === "" && selectedRows.length !== 0){
       console.log("No se ha escogido ninguna opción de formato")
     }else{
+      setBiactivator(true)
       const requests = []
       const regPayments = []
       const docEntries = []
@@ -165,10 +170,11 @@ export default function MassivePayments() {
         <DynamicPage
           headerContent={<DynamicPageHeader><FlexBox wrap="Wrap"><FlexBox direction="Column"><FlexBox direction={FlexBoxDirection.Column}><Label>Rango de fechas</Label><DateRangePicker onChange={handleFilter} formatPattern="yyyy-MM-dd"/></FlexBox><CheckBox text="Mostrar archivos generados" onChange={handleCheck}/></FlexBox></FlexBox></DynamicPageHeader>}
  
-          headerTitle={<DynamicPageTitle actions={<><ComboBox onChange={handlePick} placeholder='Escoger banco'>{bankOptions.options.map((item, index) => <ComboBoxItem text={item.name}/>)}</ComboBox><Button onClick={handleGenArch} design="Transparent">Generar Archivo</Button><a className="hidden" download={fileName} href={this.state.fileDownloadUrl} ref={e=>this.dofileDownload = e}>download it</a></>} header={<Title>Pagos Masivos</Title>} subHeader={<FlexBox></FlexBox>}></DynamicPageTitle>}
+          headerTitle={<DynamicPageTitle actions={<><a download={fileName} href={fileDownloadUrl} ref={e=>dofileDownload = e} hidden>download it</a><ComboBox onChange={handlePick} placeholder='Escoger banco'>{bankOptions.options.map((item, index) => <ComboBoxItem text={item.name}/>)}</ComboBox><Button onClick={handleGenArch} design="Transparent">Generar Archivo</Button></>} header={<Title>Pagos Masivos</Title>} subHeader={<FlexBox></FlexBox>}></DynamicPageTitle>}
         >
           <SAPTableComponent data={dataTable} column={column} selectedRowsFromChildToParent={selectedRowsFromChildToParent}/>  
         </DynamicPage>
+        <BusyIndicator active={biactivator}/>
       </div>
     </>
     
