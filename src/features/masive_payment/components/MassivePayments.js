@@ -32,6 +32,7 @@ import {
 export default function MassivePayments() {
   //let cmbBancoRef = useRef()
   let dofileDownload = useRef()
+  //let accountData = useRef([])
   const [pageStatus, setPageStatus] = useState(false)
   const [accountSelector, setAccountSelector] = useState(false)
   const [accSelected, setAccSelected] = useState("")
@@ -39,10 +40,11 @@ export default function MassivePayments() {
   const [dataTable, setDataTable] = useState([])
   const [dates, setDates] = useState([])
   const [checkState, setCheckState] = useState(false)
-  const [bankPicked, setBankPicked] = useState([])
+  const [bankPicked, setBankPicked] = useState(["",""])
   const [fileDownloadUrl, setFileDownloadUrl] = useState("")
   const [biactivator, setBiactivator] = useState(false)
   const currentdate = new Date()
+  let fileName = "PAGOS_MASIVOS_"+ bankPicked[1].replace(" ", "") +  currentdate.getDate() + (currentdate.getMonth()+1) + currentdate.getFullYear() + currentdate.getHours() + currentdate.getMinutes() + ".txt"
   let selectedRows = []
  
 
@@ -135,7 +137,7 @@ export default function MassivePayments() {
   function handlePick(e){
     setAccountSelector(true)
     setPageStatus(false)
-    
+
     const cbGenArch = document.getElementById("cbGenArch")
     const cmbAccount = document.getElementById("cmbAccount")
     const drpFechasAP = document.getElementById("drpFechasAP")
@@ -182,6 +184,7 @@ export default function MassivePayments() {
       const regPayments = []
       const docEntries = []
       const result = []
+      const setDatePayments = []
       let format = ""
       let archgen = ""
 
@@ -214,27 +217,39 @@ export default function MassivePayments() {
         result.push(item.value.data.value[0])
       })      
       
-      let secuencial = 1
-      
 
-      result.forEach((res) => {
-        const resArr = Object.keys(res).map(key => res[key])
-        let iterador = 0
-        resArr.forEach((line) => {
-          if (line === null) line = ""
-          if (resArr.indexOf(line) === 2) line = secuencial
-          if (resArr.lastIndexOf(line) === resArr.length - 1 && iterador === resArr.length-1) line = line + '\n'
-          else line = line + '\t'
-          
-          archgen += line
-          iterador ++
-       })
-       secuencial ++
-      })
+      if(docEntries.length === result.length) {
+        let secuencial = 1
+        
+
+        result.forEach((res) => {
+          const resArr = Object.keys(res).map(key => res[key])
+          let iterador = 0
+          resArr.forEach((line) => {
+            if (line === null) line = ""
+            if (resArr.indexOf(line) === 2) line = secuencial
+            if (resArr.lastIndexOf(line) === resArr.length - 1 && iterador === resArr.length-1) line = line + '\n'
+            else line = line + '\t'
+            
+            archgen += line
+            iterador ++
+        })
+        secuencial ++
+        })
 
 
-      fileDownload(archgen)
-      selectedRows = []
+        fileDownload(archgen)
+        selectedRows = []
+        
+        
+        for(let i = 0; i < docEntries.length; i++){
+          const payGenDate = { U_U_GENARC: currentdate.getFullYear() + '-' + (currentdate.getMonth()+1) + '-' + currentdate.getDate() } 
+          setDatePayments.push(axios.patch(configData["url"] + 'VendorPayments(' + docEntries[i] + ')',payGenDate, {withCredentials:true}))
+        }
+      }
+      else{
+        console.log("No se pudo cargar los pagos seleccionados")
+      }
 
     }
 
@@ -276,9 +291,9 @@ export default function MassivePayments() {
       <FlexBox direction={FlexBoxDirection.Column} alignItems={FlexBoxAlignItems.Center} ><BusyIndicator active={biactivator}/></FlexBox>
       <div>
         <DynamicPage
-          headerContent={<DynamicPageHeader><FlexBox wrap="Wrap"><FlexBox direction="Column"><FlexBox style={{height:'50px'}}><ComboBox id='cmbAccount' style={{width:'240px'}} placeholder='Escoger cuenta' disabled={accountSelector === true ? 'false' : 'true'} onChange={handleAccChange}>{accountData.map((acc,index) => <ComboBoxItem key={acc.AccNo} text={acc.AccountName} additionalText={acc.AccNo}/>)}</ComboBox></FlexBox><FlexBox direction={FlexBoxDirection.Column}><Label>Rango de fechas</Label><DateRangePicker id='drpFechasAP' onChange={handleFilter} formatPattern="yyyy-MM-dd" disabled={pageStatus === true ? 'false' : 'true'}/></FlexBox><CheckBox id="cbGenArch" text="Mostrar archivos generados" onChange={handleCheck} disabled={pageStatus === true ? 'false' : 'true'}/></FlexBox></FlexBox></DynamicPageHeader>}
+          headerContent={<DynamicPageHeader><FlexBox wrap="Wrap"><FlexBox direction="Column"><FlexBox style={{height:'50px'}}><ComboBox id='cmbAccount' style={{width:'240px'}} placeholder='Escoger cuenta' disabled={accountSelector === true ? 'false' : 'true'} onChange={handleAccChange} waitForDefine>{accountData.map((acc,index) => <ComboBoxItem key={acc.AccNo} text={acc.AccountName} additionalText={acc.AccNo}/>)}</ComboBox></FlexBox><FlexBox direction={FlexBoxDirection.Column}><Label>Rango de fechas</Label><DateRangePicker id='drpFechasAP' onChange={handleFilter} formatPattern="yyyy-MM-dd" disabled={pageStatus === true ? 'false' : 'true'}/></FlexBox><CheckBox id="cbGenArch" text="Mostrar archivos generados" onChange={handleCheck} disabled={pageStatus === true ? 'false' : 'true'}/></FlexBox></FlexBox></DynamicPageHeader>}
  
-          headerTitle={<DynamicPageTitle actions={<><a download={"PAGOS_MASIVOS_"+ bankPicked[1].replace(" ", "") +  currentdate.getDate() + (currentdate.getMonth()+1) + currentdate.getFullYear() + currentdate.getHours() + currentdate.getMinutes() + ".txt"} href={fileDownloadUrl} ref={e=>dofileDownload = e} hidden>download it</a><Button design='Emphasized' icon='capital-projects' onClick={openBankSelector}>Escoger Banco</Button><Button onClick={handleGenArch} design="Transparent" icon='document-text'>Generar Archivo</Button></>} header={<><Title>Pagos Masivos</Title><Badge icon={<Icon name='loan'/>} colorScheme={accountSelector === true ? "8" : "2"}>{bankPicked[1]}</Badge></>} subHeader={<FlexBox></FlexBox>}></DynamicPageTitle>}
+          headerTitle={<DynamicPageTitle actions={<><a download={fileName} href={fileDownloadUrl} ref={e=>dofileDownload = e} hidden>download it</a><Button design='Emphasized' icon='capital-projects' onClick={openBankSelector}>Escoger Banco</Button><Button onClick={handleGenArch} design="Transparent" icon='document-text'>Generar Archivo</Button></>} header={<><Title>Pagos Masivos</Title><Badge icon={<Icon name='loan'/>} colorScheme={accountSelector === true ? "8" : "2"}>{bankPicked[1]}</Badge></>} subHeader={<FlexBox></FlexBox>}></DynamicPageTitle>}
         >
           <PageContent/>
         </DynamicPage>

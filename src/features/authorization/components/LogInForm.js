@@ -38,7 +38,8 @@ export default function LogInForm() {
     try{
       setError("")
       setLoading(true)
-      await login(userRef.current.value, passRef.current.value)
+      const response = await login(userRef.current.value, passRef.current.value)
+      console.log(response)
       navigate("/massPayments")
     }catch{
       setError("Credenciales inválidas")
