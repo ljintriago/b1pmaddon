@@ -9,43 +9,62 @@ import {
   DateRangePicker,
   FlexBox,
   FlexBoxDirection,
+  FlexBoxAlignItems,
   DynamicPageHeader,
   CheckBox,
   ComboBox,
   ComboBoxItem,
-  BusyIndicator
+  BusyIndicator,
+  Badge,
+  Icon,
+  IllustratedMessage ,
+  IllustrationMessageType,
+  SelectDialog,
+  StandardListItem
  } from '@ui5/webcomponents-react';
  import axios from 'axios'
  import configData from "../../../data/LogInConfig.json"
  import bankOptions from "../../../data/BankOptions.json"
  import SAPTableComponent  from '../../../components/Table'
+ import "@ui5/webcomponents-icons/dist/AllIcons.js"
+ import "@ui5/webcomponents-fiori/dist/illustrations/AllIllustrations.js"
 
 export default function MassivePayments() {
+  //let cmbBancoRef = useRef()
   let dofileDownload = useRef()
+  const [pageStatus, setPageStatus] = useState(false)
+  const [accountSelector, setAccountSelector] = useState(false)
+  const [accSelected, setAccSelected] = useState("")
+  const [accountData, setAccountData] = useState([])
   const [dataTable, setDataTable] = useState([])
   const [dates, setDates] = useState([])
   const [checkState, setCheckState] = useState(false)
-  const [selectedRows, setSelectedRows] = useState([])
-  const [bankPicked, setBankPicked] = useState("")
+  const [bankPicked, setBankPicked] = useState([])
   const [fileDownloadUrl, setFileDownloadUrl] = useState("")
   const [biactivator, setBiactivator] = useState(false)
   const currentdate = new Date()
-  const fileName = "PAGOS_MASIVOS_"+ bankPicked.replace(" ", "") +  currentdate.getDate() + (currentdate.getMonth()+1) + currentdate.getFullYear() + currentdate.getHours() + currentdate.getMinutes() + ".txt"
+  let selectedRows = []
+ 
 
-
-  useEffect(() => {
+ /*  useEffect(() => {
     axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=U_U_GENARC eq null', {withCredentials:true})
     .then(res => setDataTable(res.data["value"]))
     .catch(err => console.log(err))
-  }, [])
+  }, []) */
 
-  useEffect(() => {
-    if (dates.length!==0) axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=PmntDate ge \''+ dates[0] +'\' and PmntDate le \''+ dates[1] +'\'', {withCredentials:true})
+ /*  useEffect(() => {
+    if (dates.length!==0) {
+      axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=PmntDate ge \''+ dates[0] +'\' and PmntDate le \''+ dates[1] +'\'', {withCredentials:true})
     .then(res => setDataTable(res.data["value"]))
     .catch(err => console.log(err))
-  }, [dates])
+    } else {
+      axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=U_U_GENARC eq null', {withCredentials:true})
+      .then(res => setDataTable(res.data["value"]))
+      .catch(err => console.log(err))
+    }
+  }, [dates]) */
 
-  useEffect(() => {
+  /* useEffect(() => {
     if(checkState){
       axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ', {withCredentials:true})
       .then(res => setDataTable(res.data["value"]))
@@ -55,7 +74,35 @@ export default function MassivePayments() {
       .then(res => setDataTable(res.data["value"]))
       .catch(err => console.log(err))
     }
-  }, [checkState])
+  }, [checkState]) */
+
+  useEffect(() => {
+    if(accSelected !== ""){
+
+      let filters = ""
+
+      if(!checkState) {
+        filters = " and U_U_GENARC eq null"
+      }
+
+      if(dates.length !== 0) {
+        filters += " and PmntDate ge '"+ dates[0] +"' and PmntDate le '"+ dates[1] +"'"
+      }
+
+      axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=PymBnkAcct eq \'' + accSelected + '\' and PymBnkCode eq \'' + bankPicked[0] + '\'' + filters, {withCredentials:true})
+    .then(res => setDataTable(res.data["value"]))
+    .catch(err => console.log(err))
+    }
+
+  },[accSelected, dates, checkState, bankPicked])
+
+  useEffect(() => {
+    if(bankPicked.length !== 0) {
+      axios.get(configData["url"] + 'HouseBankAccounts?$select=AccNo,AccountName&$filter=BankCode eq \'' + bankPicked[0] + '\'', {withCredentials:true})
+    .then(res => setAccountData(res.data["value"]))
+    .catch(err => console.log(err))
+    }
+  }, [bankPicked])
 
   useEffect(() => {
     if (fileDownloadUrl !== ""){
@@ -72,8 +119,47 @@ export default function MassivePayments() {
     setCheckState(e.target["_state"]["checked"])
   }
 
+  function handleAccChange(e){
+    setPageStatus(true)
+    const cmbAccount = document.getElementById("cmbAccount")
+    for (let i=0; i < cmbAccount.children.length; i++)
+    {
+      if (cmbAccount.children[i].selected) 
+      {
+        setAccSelected(cmbAccount.children[0].additionalText)
+      }
+      
+    }
+  }
+
   function handlePick(e){
-    setBankPicked(e.srcElement["_state"]["value"])
+    setAccountSelector(true)
+    setPageStatus(false)
+    
+    const cbGenArch = document.getElementById("cbGenArch")
+    const cmbAccount = document.getElementById("cmbAccount")
+    const drpFechasAP = document.getElementById("drpFechasAP")
+    cbGenArch.checked = false
+    cmbAccount.value = ""
+    drpFechasAP.value = ""
+
+    setBankPicked([e.detail["selectedItems"][0]["id"], e.detail["selectedItems"][0]["innerText"]])
+
+    setAccSelected("")
+    setDataTable([])
+    
+  }
+
+  const handleSelection = (e) => {
+    let selectedRowsArray = []
+    let selectedRowslen = 0
+   
+    selectedRowslen=e.detail["selectedRows"].length
+    for (let i = 0; i < selectedRowslen; i++) {
+      selectedRowsArray.push(e.detail["selectedRows"][i]["childNodes"][0]["innerText"]);
+    }
+
+    selectedRows = selectedRowsArray 
   }
 
   function fileDownload(fileTextContent){
@@ -83,14 +169,14 @@ export default function MassivePayments() {
 
   async function handleGenArch(e){
     e.preventDefault()
-    selectedRowsFromChildToParent()
-    if(bankPicked === "" && selectedRows.length === 0){
+    if(bankPicked.length === 0 && selectedRows.length === 0){
       console.log("No se ha escogido ninguna opción de formato, ni se ha seleccionado ningún conjunto de pagos")
-    }else if(bankPicked !== "" && selectedRows.length === 0){
+    }else if(bankPicked.length !== 0 && selectedRows.length === 0){
       console.log("No se ha seleccionado ningún conjunto de pagos")
-    }else if(bankPicked === "" && selectedRows.length !== 0){
+    }else if(bankPicked.length === 0 && selectedRows.length !== 0){
       console.log("No se ha escogido ninguna opción de formato")
     }else{
+      
       setBiactivator(true)
       const requests = []
       const regPayments = []
@@ -100,8 +186,7 @@ export default function MassivePayments() {
       let archgen = ""
 
       bankOptions.options.map((bank,index) => {
-        if(bank.name === bankPicked) format = bank.selectedDataFromView
-        else return
+        if(bank.name === bankPicked[1]) format = bank.selectedDataFromView
       })
 
       for(let i = 0; i < selectedRows.length; i++){
@@ -130,28 +215,49 @@ export default function MassivePayments() {
       })      
       
       let secuencial = 1
+      
 
       result.forEach((res) => {
         const resArr = Object.keys(res).map(key => res[key])
-        
+        let iterador = 0
         resArr.forEach((line) => {
           if (line === null) line = ""
           if (resArr.indexOf(line) === 2) line = secuencial
-          if (resArr.indexOf(line) === resArr.length - 1) line = line + '\n'
+          if (resArr.lastIndexOf(line) === resArr.length - 1 && iterador === resArr.length-1) line = line + '\n'
           else line = line + '\t'
           
           archgen += line
+          iterador ++
        })
        secuencial ++
       })
 
+
       fileDownload(archgen)
+      selectedRows = []
+
     }
 
   }
 
-  const selectedRowsFromChildToParent = (childSelectedRows) => {
-    setSelectedRows(childSelectedRows)
+  function openBankSelector(e){
+    e.preventDefault()
+    let bankDialog = document.getElementById("bankSelector")
+    bankDialog.show()
+  }
+
+  const PageContent = () => {
+    if(pageStatus === true) {
+      if(dataTable.length === 0) {
+        return <IllustratedMessage name={IllustrationMessageType.NoSearchResults} titleText="No existen resultados" subtitleText='Intente modificar los criterios de busqueda'/>
+        
+      }else {
+        return <SAPTableComponent id="contentData" data={dataTable} column={column} handleSelectionChange={handleSelection}/>
+      }
+    }
+    else {
+      return <IllustratedMessage name={IllustrationMessageType.SimpleMagnifier} titleText="Obtengamos resultados" subtitleText='Comience escogiendo un banco y una cuenta'/>
+    }
   }
 
   const column = [
@@ -162,20 +268,22 @@ export default function MassivePayments() {
     {heading: 'Monto', value:'PymDocAmnt'},
     {heading: 'Generado', value:'U_U_GENARC'}
     ]
+  
 
   return (
     <>
       <ShellBar primaryTitle="Powered by SEIDOR S.A." />
+      <FlexBox direction={FlexBoxDirection.Column} alignItems={FlexBoxAlignItems.Center} ><BusyIndicator active={biactivator}/></FlexBox>
       <div>
         <DynamicPage
-          headerContent={<DynamicPageHeader><FlexBox wrap="Wrap"><FlexBox direction="Column"><FlexBox direction={FlexBoxDirection.Column}><Label>Rango de fechas</Label><DateRangePicker onChange={handleFilter} formatPattern="yyyy-MM-dd"/></FlexBox><CheckBox text="Mostrar archivos generados" onChange={handleCheck}/></FlexBox></FlexBox></DynamicPageHeader>}
+          headerContent={<DynamicPageHeader><FlexBox wrap="Wrap"><FlexBox direction="Column"><FlexBox style={{height:'50px'}}><ComboBox id='cmbAccount' style={{width:'240px'}} placeholder='Escoger cuenta' disabled={accountSelector === true ? 'false' : 'true'} onChange={handleAccChange}>{accountData.map((acc,index) => <ComboBoxItem key={acc.AccNo} text={acc.AccountName} additionalText={acc.AccNo}/>)}</ComboBox></FlexBox><FlexBox direction={FlexBoxDirection.Column}><Label>Rango de fechas</Label><DateRangePicker id='drpFechasAP' onChange={handleFilter} formatPattern="yyyy-MM-dd" disabled={pageStatus === true ? 'false' : 'true'}/></FlexBox><CheckBox id="cbGenArch" text="Mostrar archivos generados" onChange={handleCheck} disabled={pageStatus === true ? 'false' : 'true'}/></FlexBox></FlexBox></DynamicPageHeader>}
  
-          headerTitle={<DynamicPageTitle actions={<><a download={fileName} href={fileDownloadUrl} ref={e=>dofileDownload = e} hidden>download it</a><ComboBox onChange={handlePick} placeholder='Escoger banco'>{bankOptions.options.map((item, index) => <ComboBoxItem text={item.name}/>)}</ComboBox><Button onClick={handleGenArch} design="Transparent">Generar Archivo</Button></>} header={<Title>Pagos Masivos</Title>} subHeader={<FlexBox></FlexBox>}></DynamicPageTitle>}
+          headerTitle={<DynamicPageTitle actions={<><a download={"PAGOS_MASIVOS_"+ bankPicked[1].replace(" ", "") +  currentdate.getDate() + (currentdate.getMonth()+1) + currentdate.getFullYear() + currentdate.getHours() + currentdate.getMinutes() + ".txt"} href={fileDownloadUrl} ref={e=>dofileDownload = e} hidden>download it</a><Button design='Emphasized' icon='capital-projects' onClick={openBankSelector}>Escoger Banco</Button><Button onClick={handleGenArch} design="Transparent" icon='document-text'>Generar Archivo</Button></>} header={<><Title>Pagos Masivos</Title><Badge icon={<Icon name='loan'/>} colorScheme={accountSelector === true ? "8" : "2"}>{bankPicked[1]}</Badge></>} subHeader={<FlexBox></FlexBox>}></DynamicPageTitle>}
         >
-          <SAPTableComponent data={dataTable} column={column} selectedRowsFromChildToParent={selectedRowsFromChildToParent}/>  
+          <PageContent/>
         </DynamicPage>
-        <BusyIndicator active={biactivator}/>
       </div>
+      <SelectDialog id='bankSelector' headerText='Bancos' onConfirm={handlePick} rememberSelections='true'>{bankOptions.options.map((item, index) => <StandardListItem key={item.code} id={item.code} description={item.code} image={require('../assets/bank_logos/' + item.logo)}>{item.name}</StandardListItem>)}</SelectDialog>
     </>
     
   )

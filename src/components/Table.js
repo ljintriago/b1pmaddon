@@ -4,31 +4,15 @@ import {
     Table, TableCell, TableColumn, TableRow, TableGrowingMode, TableMode
    } from '@ui5/webcomponents-react';
 
-export default function SAPTableComponent({data, column, selectedRowsFromChildToParent}) { 
-  
-  const [selectedRows, setSelectedRows]= useState([])
-
-  function handleSelection(e){
-    let selectedRowsArray = []
-    let selectedRowslen = 0
-   
-    selectedRowslen=e.detail["selectedRows"].length
-    for (let i = 0; i < selectedRowslen; i++) {
-      selectedRowsArray.push(e.detail["selectedRows"][i]["childNodes"][0]["innerText"]);
-    }
-
-    setSelectedRows(selectedRowsArray)
-  }
-
-  selectedRowsFromChildToParent (selectedRows) 
+export default function SAPTableComponent({id, data, column, handleSelectionChange}) { 
 
   return (
     <>
-        <Table columns={column.map((item, index) => (<><TableColumn><Label>{item.heading}</Label></TableColumn></>))} growing={TableGrowingMode.Scroll} mode={TableMode.MultiSelect} onSelectionChange={handleSelection}>
-          {data.map((reg, index) => (<TableRow>
-                                        {column.map((colitem, colindex) => (<TableCell>
+        <Table id={id} columns={column.map((item, index) => (<><TableColumn key={index}><Label>{item.heading}</Label></TableColumn></>))} growing={TableGrowingMode.Scroll} mode={TableMode.MultiSelect} onSelectionChange={handleSelectionChange}>
+          {data.map((reg, index) => (<TableRow key={index}>
+                                        {column.map((colitem, colindex) => (<TableCell key={''+index + colindex}>
                                                                               <Label>
-                                                                                {colitem.value != 'PymDocAmnt' ? reg[colitem.value] : reg[colitem.value] + ' ' + reg['Currency']}
+                                                                                {colitem.value !== 'PymDocAmnt' ? reg[colitem.value] : reg[colitem.value] + ' ' + reg['Currency']}
                                                                               </Label>
                                                                             </TableCell>))} 
                                       </TableRow>))} 
