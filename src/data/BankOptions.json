@@ -10,7 +10,7 @@
         {
             "code":"0010",
             "name":"Banco Pichincha",
-            "selectedDataFromView": "?$select=PA,UsrNumber3,DocCurr,Total,CTA,UsrNumber1,BAccount,UsrNumber2,UsrNumber32,AcctName,BankCode",
+            "selectedDataFromView": "?$select=PA,UsrNumber3,DocCurr,Total,CTA,UsrNumber1,BAccount,Referencia,UsrNumber2,UsrNumber32,AcctName,BankCode",
             "active":true,
             "logo":"logoBancoPichincha.png"
         },

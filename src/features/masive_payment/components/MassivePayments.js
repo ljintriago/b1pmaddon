@@ -227,7 +227,7 @@ export default function MassivePayments() {
           let iterador = 0
           resArr.forEach((line) => {
             if (line === null) line = ""
-            if (resArr.indexOf(line) === 2) line = secuencial
+            if (resArr.indexOf(line) === 2 && bankPicked[0] !== "0010") line = secuencial
             if (resArr.lastIndexOf(line) === resArr.length - 1 && iterador === resArr.length-1) line = line + '\n'
             else line = line + '\t'
             
