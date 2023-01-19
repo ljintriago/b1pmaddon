@@ -28,11 +28,13 @@ import {
  import SAPTableComponent  from '../../../components/Table'
  import "@ui5/webcomponents-icons/dist/AllIcons.js"
  import "@ui5/webcomponents-fiori/dist/illustrations/AllIllustrations.js"
+ import { useAuth } from "../../../contexts/AuthContext"
 
 export default function MassivePayments() {
   //let cmbBancoRef = useRef()
   let dofileDownload = useRef()
   //let accountData = useRef([])
+  const { resSessionTimeFlag,setResSessionTimeFlag, toiApp } = useAuth()
   const [pageStatus, setPageStatus] = useState(false)
   const [accountSelector, setAccountSelector] = useState(false)
   const [accSelected, setAccSelected] = useState("")
@@ -92,7 +94,12 @@ export default function MassivePayments() {
       }
 
       axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=PymBnkAcct eq \'' + accSelected + '\' and PymBnkCode eq \'' + bankPicked[0] + '\'' + filters, {withCredentials:true})
-    .then(res => setDataTable(res.data["value"]))
+    .then(res => {
+      console.log(toiApp)
+      clearTimeout(toiApp)
+      resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
+      setDataTable(res.data["value"])
+    })
     .catch(err => console.log(err))
     }
 
@@ -101,7 +108,12 @@ export default function MassivePayments() {
   useEffect(() => {
     if(bankPicked.length !== 0) {
       axios.get(configData["url"] + 'HouseBankAccounts?$select=AccNo,AccountName&$filter=BankCode eq \'' + bankPicked[0] + '\'', {withCredentials:true})
-    .then(res => setAccountData(res.data["value"]))
+    .then(res => {
+      console.log(toiApp)
+      clearTimeout(toiApp)
+      resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
+      setAccountData(res.data["value"])
+    })
     .catch(err => console.log(err))
     }
   }, [bankPicked])
@@ -197,6 +209,7 @@ export default function MassivePayments() {
       }
 
       const response = await Promise.allSettled(requests)
+      
 
       response.forEach((item) => {
         if(item.status === "rejected") return
@@ -246,6 +259,9 @@ export default function MassivePayments() {
           const payGenDate = { U_U_GENARC: currentdate.getFullYear() + '-' + (currentdate.getMonth()+1) + '-' + currentdate.getDate() } 
           setDatePayments.push(axios.patch(configData["url"] + 'VendorPayments(' + docEntries[i] + ')',payGenDate, {withCredentials:true}))
         }
+
+        clearTimeout(toiApp)
+        resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
       }
       else{
         console.log("No se pudo cargar los pagos seleccionados")
