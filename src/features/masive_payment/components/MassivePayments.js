@@ -140,7 +140,7 @@ export default function MassivePayments() {
     {
       if (cmbAccount.children[i].selected) 
       {
-        setAccSelected(cmbAccount.children[0].additionalText)
+        setAccSelected(cmbAccount.children[i].additionalText)
       }
       
     }
