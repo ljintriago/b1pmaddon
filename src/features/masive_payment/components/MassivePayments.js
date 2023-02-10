@@ -96,8 +96,8 @@ export default function MassivePayments() {
       axios.get(configData["url"] + 'sml.svc/CA_PAYWIZ?$filter=PymBnkAcct eq \'' + accSelected + '\' and PymBnkCode eq \'' + bankPicked[0] + '\'' + filters, {withCredentials:true})
     .then(res => {
       console.log(toiApp)
-      clearTimeout(toiApp)
-      resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
+      //clearTimeout(toiApp)
+      //resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
       setDataTable(res.data["value"])
     })
     .catch(err => console.log(err))
@@ -110,8 +110,8 @@ export default function MassivePayments() {
       axios.get(configData["url"] + 'HouseBankAccounts?$select=AccNo,AccountName&$filter=BankCode eq \'' + bankPicked[0] + '\'', {withCredentials:true})
     .then(res => {
       console.log(toiApp)
-      clearTimeout(toiApp)
-      resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
+      //clearTimeout(toiApp)
+      //resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
       setAccountData(res.data["value"])
     })
     .catch(err => console.log(err))
@@ -260,8 +260,8 @@ export default function MassivePayments() {
           setDatePayments.push(axios.patch(configData["url"] + 'VendorPayments(' + docEntries[i] + ')',payGenDate, {withCredentials:true}))
         }
 
-        clearTimeout(toiApp)
-        resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
+        //clearTimeout(toiApp)
+        //resSessionTimeFlag === 0 ? setResSessionTimeFlag(1) : setResSessionTimeFlag(0)
       }
       else{
         console.log("No se pudo cargar los pagos seleccionados")

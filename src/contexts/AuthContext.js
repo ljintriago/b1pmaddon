@@ -17,7 +17,7 @@ export function AuthProvider({children}) {
     const [resSessionTimeFlag, setResSessionTimeFlag] = useState(0)
     //const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
+   /*  useEffect(() => {
         if (sto!==0){
             console.log("settimeout")
         setToiApp(setTimeout(() => {
@@ -27,7 +27,7 @@ export function AuthProvider({children}) {
             }
         },sto * 60000))
         }
-    }, [sto, resSessionTimeFlag])
+    }, [sto, resSessionTimeFlag]) */
 
     function login(user, password) {
         const logindata = { CompanyDB: configData["companyDB"] , UserName: user ,Password: password }
