@@ -2,7 +2,7 @@
         {
             "code":"0017",
             "name":"Banco Guayaquil",
-            "selectedDataFromView": "?$select=PA,Account,Secuencial,Blank1,BAccount,DocCurr,Total,CTA,BankCode,UsrNumber1,BAccount2,UsrNumber2,UsrNumber3,AcctName,Blank2,Blank3,Blank4,Blank5,Referencia,Leyenda",
+            "selectedDataFromView": "?$select=PA,Account,Secuencial,Blank1,BAccount,DocCurr,TotalBGye,CTA,BankCode,UsrNumber1,BAccount2,UsrNumber2,UsrNumber3,AcctName,Blank2,Blank3,Blank4,Blank5,Referencia,Leyenda",
             "active":true,
             "logo":"logoBancoGuayaquil.png"
         },
