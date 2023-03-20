@@ -17,9 +17,11 @@ import { useAuth } from "../../../contexts/AuthContext"
 import "../assets/LogIn.css"
 import configData from "../../../data/LogInConfig.json"
 import { useNavigate } from "react-router-dom"
+import MStrip from '../../../components/MStrip';
 
 
 export default function LogInForm() {
+  const msRef = useRef()
   const userRef = useRef()
   const passRef = useRef()
   const { login } = useAuth()
@@ -41,10 +43,14 @@ export default function LogInForm() {
       const response = await login(userRef.current.value, passRef.current.value)
       console.log(response)
       navigate("/massPayments")
-    }catch{
+    }catch(e){
       setError("Credenciales inválidas")
       setLoading(false)
-      showToast()
+      
+      msRef.current.createMS("msgError", e, "Negative")
+      //msref.current.createMS("loginMsgErr","Negative", error)
+      //createMS("loginMsgErr","Negative",error)
+      //showToast()
     }
   }
 
@@ -81,9 +87,9 @@ export default function LogInForm() {
         </FlexBox>
         
       </FlexBox>
-      <Toast ref={ toast } >
-        { error }
-      </Toast>
+      <MStrip ref={ msRef }>
+        
+      </MStrip>
     </>
   )
 }

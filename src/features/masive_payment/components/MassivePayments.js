@@ -31,6 +31,9 @@ import {
  import { useAuth } from "../../../contexts/AuthContext"
 
 export default function MassivePayments() {
+  let counter = useRef(0)
+  let today = useRef(Date.getDate())
+  let lastDayPrinted = useRef(0)
   //let cmbBancoRef = useRef()
   let dofileDownload = useRef()
   //let accountData = useRef([])
@@ -46,7 +49,7 @@ export default function MassivePayments() {
   const [fileDownloadUrl, setFileDownloadUrl] = useState("")
   const [biactivator, setBiactivator] = useState(false)
   const currentdate = new Date()
-  let fileName = "PAGOS_MASIVOS_"+ bankPicked[1].replace(" ", "") +  currentdate.getDate() + (currentdate.getMonth()+1) + currentdate.getFullYear() + currentdate.getHours() + currentdate.getMinutes() + ".txt"
+  let fileName = "PAGOS_MULTICASH_"/* + bankPicked[1].replace(" ", "") */ +  currentdate.getFullYear() + (currentdate.getMonth()+1 < 10 ? '0' : '') + (currentdate.getDate()+1 < 10 ? '0' : '')/*  + currentdate.getHours() + currentdate.getMinutes() */ + (counter < 10 ? '0' : '') +".txt"
   let selectedRows = []
  
 
@@ -179,6 +182,7 @@ export default function MassivePayments() {
   function fileDownload(fileTextContent){
     const blob = new Blob([fileTextContent])
     setFileDownloadUrl(URL.createObjectURL(blob))
+    lastDayPrinted = Date.getDate()
   }
 
   async function handleGenArch(e){
@@ -249,7 +253,17 @@ export default function MassivePayments() {
         })
         secuencial ++
         })
-
+        
+        if(lastDayPrinted === today){
+          if(counter > 99){
+            counter++
+          }else{
+            counter = 1
+          }
+          
+        }else{
+          counter = 1
+        }
 
         fileDownload(archgen)
         selectedRows = []
